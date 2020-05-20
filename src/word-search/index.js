@@ -42,13 +42,13 @@ function wordSearch(words, word) {
       let upRow = startingRow - 1 > 0 ? startingRow - 1 : startingRow;
 
       if (copyOfWords[startingRow][rightColumn] === stack[0]) {
-        startingColumn = startingColumn + 1;
+        startingColumn = rightColumn;
       } else if (copyOfWords[downRow][startingColumn] === stack[0]) {
-        startingRow = startingRow + 1;
+        startingRow = downRow;
       } else if (copyOfWords[startingRow][leftColumn] === stack[0]) {
-        startingColumn = startingColumn - 1;
+        startingColumn = leftColumn;
       } else if (copyOfWords[upRow][startingColumn] === stack[0]) {
-        startingRow = startingRow - 1;
+        startingRow = upRow;
       } else {
         break;
       }
