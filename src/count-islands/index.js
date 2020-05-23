@@ -2,35 +2,41 @@ function countIslands(grid) {
   const rowSize = grid.length;
   const columnSize = grid[0].length;
 
-  let startingPositions = [];
+  function getGridItem(row, column) {
+    return grid[parseInt(row)][parseInt(column)];
+  }
+
+  let startingNodes = [];
+
+  let visitedNodes = [];
 
   let islands = 0;
 
+  // Function for getting all the positions of 1 in the grid
   for (let row = 0; row < rowSize; row++) {
-    for (let column = 0; column < grid[row].length; column++) {
-      if (grid[row][column] === 1) {
-        startingPositions.push([row, column]);
+    for (let column = 0; column < columnSize; column++) {
+      if (getGridItem(row, column) === 1) {
+        startingNodes.push([row, column]);
       }
     }
   }
 
-  let copyOfStartingPositions = [...startingPositions];
-
-  // console.log(copyOfStartingPositions);
-
+  // Function for checking for an array
   function checkForArray(parentArray, childArray) {
-    const parent = JSON.stringify(parentArray);
     const child = JSON.stringify(childArray);
 
-    return parent.indexOf(child);
+    let contains = parentArray.some((point) => JSON.stringify(point) === child);
+
+    return contains;
   }
 
+  // Function for getting all the adjacent positions
   function getAdjacents(position) {
     const [row, column] = position;
 
     const topAdjacent = row === 0 ? false : [row - 1, column];
-    const rightAdjacent = column === columnSize ? false : [row, column + 1];
-    const bottomAdjacent = row === rowSize ? false : [row + 1, column];
+    const rightAdjacent = column === columnSize - 1 ? false : [row, column + 1];
+    const bottomAdjacent = row === rowSize - 1 ? false : [row + 1, column];
     const leftAdjacent = column === 0 ? false : [row, column - 1];
 
     return [topAdjacent, rightAdjacent, bottomAdjacent, leftAdjacent].filter(
@@ -38,50 +44,36 @@ function countIslands(grid) {
     );
   }
 
-  // function gridItem(array) {
-  //   return grid[parseInt(array[0])][parseInt(array[1])];
-  // }
-
-  for (let each = 0; each < startingPositions.length; each++) {
-    const startingRow = parseInt(startingPositions[each][0]);
-    const startingColumn = parseInt(startingPositions[each][1]);
-
-    const item = [startingRow, startingColumn];
-
-    if (checkForArray(copyOfStartingPositions, item) > -1) {
-      let path = [];
-
+  for (let node of startingNodes) {
+    // Using BFS to traverse grid with starting nodes that haven't been visited
+    if (!checkForArray(visitedNodes, node)) {
+      // Creating a queue
       let queue = [];
-      queue.push([startingRow, startingColumn]);
 
-      function checkPath(array) {
-        return checkForArray(path, array);
-      }
+      // Pushing starting node to queue
+      queue.push(node);
 
       while (queue.length > 0) {
-        // console.log(queue);
-        path.push(queue[0]);
+        visitedNodes.push(queue[0]);
 
-        copyOfStartingPositions.splice(
-          checkForArray(copyOfStartingPositions, queue[0]),
-          1
-        );
+        const adjacents = getAdjacents(queue[0]);
 
-        let adjacentPositions = getAdjacents(queue[0]);
-
-        for (let point of adjacentPositions) {
-          let position = [parseInt(point[0]), parseInt(point[1])];
-
+        // Pushing eligible (nodes with 1) adjacent nodes that haven't been visited into queue
+        for (let adjacent of adjacents) {
           if (
-            checkForArray(startingPositions, position) > -1 &&
-            checkPath(position) < 0
+            checkForArray(startingNodes, adjacent) &&
+            !checkForArray(queue, adjacent) &&
+            !checkForArray(visitedNodes, adjacent)
           ) {
-            queue.push(position);
+            queue.push(adjacent);
+            grid[adjacent[0]][adjacent[1]] = "#";
           }
         }
 
+        // unqueue visited node
         queue.shift();
       }
+
       islands++;
     }
   }
